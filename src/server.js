@@ -447,16 +447,23 @@ function start(opts) {
     }
   });
 
-  const server = app.listen(process.env.PORT || opts.port, process.env.BIND || opts.bind, function () {
-    let address = this.address().address;
-    if (address.indexOf('::') === 0) {
-      address = `[${address}]`; // literal IPv6 address
-    }
-    console.log(`Listening at http://${address}:${this.address().port}/`);
-  });
+  const server = undefined
+  if (!opts.noserver) {
+    server = app.listen(
+      process.env.PORT || opts.port,
+      process.env.BIND || opts.bind,
+      function () {
+        let address = this.address().address;
+        if (address.indexOf("::") === 0) {
+          address = `[${address}]`; // literal IPv6 address
+        }
+        console.log(`Listening at http://${address}:${this.address().port}/`);
+      }
+    );
 
-  // add server.shutdown() to gracefully stop serving
-  enableShutdown(server);
+    // add server.shutdown() to gracefully stop serving
+    enableShutdown(server);
+  }
 
   return {
     app: app,
