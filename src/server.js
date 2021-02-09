@@ -197,6 +197,13 @@ function start(opts) {
 
     startupPromises.push(
       serve_data.add(options, serving.data, item, id, opts.publicUrl)
+        .catch((err) => {
+          if (opts.ignoreBadFiles) {
+            console.warn(`Ignoring problematic MBTile ${item.mbtiles} due to error`, err)
+          } else {
+            throw err
+          }
+        })
     );
   }
 
@@ -475,10 +482,12 @@ function start(opts) {
 module.exports = opts => {
   const running = start(opts);
 
-  running.startupPromise.catch(err => {
-    console.error(err.message);
-    process.exit(1);
-  });
+  if (!opts.noExitOnFatalError) {
+    running.startupPromise.catch(err => {
+      console.error(err.message);
+      process.exit(1);
+    });
+  }
 
   process.on('SIGINT', () => {
     process.exit();
